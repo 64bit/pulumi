@@ -1,0 +1,77 @@
+name: Builds CLI and SDK binaries.
+
+on:
+  workflow_call:
+    inputs:
+      go-version:
+        description: 'Version of the Go toolchain for the build'
+        default: '1.17.x'
+        required: false
+        type: string
+      goreleaser-flags:
+        description: 'Command-line flags to pass to goreleaser'
+        default: '-p 3 -f .goreleaser.build.yml --snapshot --skip-validate'
+        required: false
+        type: string
+    secrets: {}
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  build_pulumi_go_binaries:
+    name: Build Pulumi Go binaries
+
+    # Due to the use of CGO in `pulumi` this cross-compilation step
+    # cannot proceed on `ubuntu-latest`, which would have been
+    # preferable.
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ env.PR_COMMIT_SHA }}
+      - name: Fetch Tags
+        run: |
+          git fetch --quiet --prune --unshallow --tags
+      - name: Install pulumictl
+        uses: jaxxstorm/action-install-gh-release@v1.2.0
+        with:
+          repo: pulumi/pulumictl
+      - name: Set up Go ${{ inputs.go-version }}
+        uses: actions/setup-go@v1
+        with:
+          go-version: ${{ inputs.go-version }}
+      - name: Compute current version to inform GoReleaser
+        run: |
+          echo "GORELEASER_CURRENT_TAG=v$(pulumictl get version --language generic -o)" >> $GITHUB_ENV
+      - name: Run GoReleaser to build Go Pulumi binaries
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          version: latest
+          args: ${{ inputs.goreleaser-flags }}
+      - name: Upload pulumi-darwin-arm64.tar.gz
+        uses: actions/upload-artifact@v2
+        with:
+            name: pulumi-darwin-arm64
+            path: goreleaser/pulumi*-darwin-arm64.tar.gz
+      - name: Upload pulumi-darwin-x64.tar.gz
+        uses: actions/upload-artifact@v2
+        with:
+            name: pulumi-darwin-x64
+            path: goreleaser/pulumi*-darwin-x64.tar.gz
+      - name: Upload pulumi-linux-arm64.tar.gz
+        uses: actions/upload-artifact@v2
+        with:
+            name: pulumi-linux-arm64.tar.gz
+            path: goreleaser/pulumi*-linux-arm64.tar.gz
+      - name: Upload pulumi-linux-x64.tar.gz
+        uses: actions/upload-artifact@v2
+        with:
+            name: pulumi-linux-x64.tar.gz
+            path: goreleaser/pulumi*-linux-x64.tar.gz
+      - name: Upload pulumi-windows-x64.zip
+        uses: actions/upload-artifact@v2
+        with:
+            name: pulumi-windows-x64.zip
+            path: goreleaser/pulumi*-windows-x64.zip
