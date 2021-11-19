@@ -6,7 +6,7 @@ import * as latestShipped from "@pulumi/pulumi";
 
 // Note: we reference 'bin' as we want to see the typescript types with all internal information
 // stripped.
-import * as localUnshipped from "local-pulumi";
+import * as localUnshipped from "../../bin";
 
 declare let latestShippedResource: latestShipped.Resource;
 declare let localUnshippedResource: localUnshipped.Resource;
