@@ -260,6 +260,12 @@ jobs:
       - name: Inspect downloaded artifacts
         run: |
           find artifacts
+      - name: Install Pulumi Node SDK
+        run: |
+          PKG=$(ls artifacts/nodejs/*.tgz)
+          npm i $PKG
+          # also install as local-pulumi alias used by sxs tests
+          npm i local-pulumi@$PKG
       - name: Test
         run: make TEST_ALL_DEPS= test_all
         env:
