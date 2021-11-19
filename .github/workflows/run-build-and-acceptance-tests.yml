@@ -266,6 +266,7 @@ jobs:
         run: |
           cd sdk/nodejs
           make build_package
+          yarn link
       - name: Ensure dependencies for testing the Python SDK
         run: |
           cd sdk/python
