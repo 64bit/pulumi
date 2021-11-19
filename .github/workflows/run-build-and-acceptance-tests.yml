@@ -230,6 +230,36 @@ jobs:
         with:
           repo: t0yv0/goteststats
           tag: v0.0.7
+      - name: Download Pulumi Go Binaries (linux-x64)
+        if: ${{ matrix.platform == 'ubuntu-latest' }}
+        uses: actions/download-artifact@v2
+        with:
+          name: pulumi-linux-x64.tar.gz
+          path: artifacts/go
+      - name: Download Pulumi Go Binaries (darwin-x64)
+        if: ${{ matrix.platform == 'macos-latest' }}
+        uses: actions/download-artifact@v2
+        with:
+          name: pulumi-darwin-x64.tar.gz
+          path: artifacts/go
+      - name: Download Pulumi Python SDK
+        uses: actions/download-artifact@v2
+        with:
+          name: pulumi.whl
+          path: artifacts/python
+      - name: Download Pulumi Node SDK
+        uses: actions/download-artifact@v2
+        with:
+          name: pulumi-node-sdk.tgz
+          path: artifacts/nodejs
+      - name: Download Pulumi .NET SDK
+        uses: actions/download-artifact@v2
+        with:
+          name: pulumi-nuget-packages
+          path: artifacts/dotnet
+      - name: Inspect downloaded artifacts
+        run: |
+          find artifacts
       - name: Test
         run: make TEST_ALL_DEPS= test_all
         env:
