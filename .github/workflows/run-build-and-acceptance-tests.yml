@@ -260,9 +260,13 @@ jobs:
       - name: Inspect downloaded artifacts
         run: |
           find artifacts
+      - name: Compute current version to inform the NuGet package build
+        run: |
+          echo "PULUMI_VERSION=$(pulumictl get version --language javascript)" >> $GITHUB_ENV
       - name: Install Node testing dependencies
         run: |
           cd sdk/nodejs
+          node ../../scripts/reversion.js package.json $PULUMI_VERSION
           npm i
       - name: Install Pulumi Node SDK
         run: |
