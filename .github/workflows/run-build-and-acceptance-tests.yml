@@ -266,6 +266,15 @@ jobs:
         run: |
           cd sdk/nodejs
           make build_package
+      - name: Ensure dependencies for testing the Python SDK
+        run: |
+          cd sdk/python
+          make ensure
+      - name: Install Python SDK
+        run: |
+          cd sdk/python
+          PKG=$(ls ../../artifacts/python/*.whl)
+          pipenv install $PKG
       - name: Test
         run: make TEST_ALL_DEPS= test_all
         env:
